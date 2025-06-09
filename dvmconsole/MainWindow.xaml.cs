@@ -51,6 +51,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Threading;
 using System.Security.Policy;
+using System.Windows.Shapes;
+using System.Reflection;
+using Path = System.IO.Path;
+using static dvmconsole.Codeplug;
 
 namespace dvmconsole
 {
@@ -120,6 +124,7 @@ namespace dvmconsole
 		private bool hc5entered;
 		private bool hc6entered;
 		private BackgroundWorker regbackgroundworker1 = new BackgroundWorker();
+		private BackgroundWorker regbackgroundworker2 = new BackgroundWorker();
 		private BackgroundWorker chregbackgroundworker1 = new BackgroundWorker();
 		private BackgroundWorker volbackgroundworker1 = new BackgroundWorker();
 		private BackgroundWorker errmsgbackgroundworker1 = new BackgroundWorker();
@@ -132,7 +137,21 @@ namespace dvmconsole
         private string currentsystem;
         private string currentdestID;
         private string currentmode;
-        private int currentInternalID;
+        private int currentInternalID =0;
+        private bool _sysregstate;
+
+		public bool sysregstate 
+        {
+			get => _sysregstate;
+			set
+			{
+				if (_sysregstate != value) // Check if the value is actually changing
+				{
+					_sysregstate = value;
+					SysRegStateChange(); // Call the function when the variable changes
+				}
+			}
+		} // True is connected. false is disconnected.. duh
 
 		//Please dont kill me for this :3 - Nyx
 		private bool pttState;
@@ -286,7 +305,19 @@ namespace dvmconsole
             LocationChanged += MainWindow_LocationChanged;
             SizeChanged += MainWindow_SizeChanged;
             Loaded += MainWindow_Loaded;
-        }
+
+			// initialize external AMBE vocoder
+			string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+			UriBuilder uri = new UriBuilder(codeBase);
+			string path = Uri.UnescapeDataString(uri.Path);
+			if (File.Exists(System.IO.Path.Combine(new string[] { System.IO.Path.GetDirectoryName(path), "AMBE.DLL" })))
+			{
+				ExternalVocoderEnabled = true;
+				ExtFullRateVocoder = new AmbeVocoder();
+				ExtHalfRateVocoder = new AmbeVocoder(false);
+			}
+
+		}
 
         /// <summary>
         /// 
@@ -473,38 +504,12 @@ namespace dvmconsole
                 // load and initialize systems
                 foreach (var system in Codeplug.Systems)
                 {
-                    SystemStatusBox systemStatusBox = new SystemStatusBox(system.Name, system.Address, system.Port);
-                    if (settingsManager.SystemStatusPositions.TryGetValue(system.Name, out var position))
-                    {
-                        Canvas.SetLeft(systemStatusBox, position.X);
-                        Canvas.SetTop(systemStatusBox, position.Y);
-                    }
-                    else
-                    {
-                        Canvas.SetLeft(systemStatusBox, offsetX);
-                        Canvas.SetTop(systemStatusBox, offsetY);
-                    }
-
-                    // widget placement
-                    systemStatusBox.MouseRightButtonDown += SystemStatusBox_MouseRightButtonDown;
-                    systemStatusBox.MouseRightButtonUp += SystemStatusBox_MouseRightButtonUp;
-                    systemStatusBox.MouseMove += SystemStatusBox_MouseMove;
-
-                    channelsCanvas.Children.Add(systemStatusBox);
-
-                    offsetX += 225;
-                    if (offsetX + 220 > channelsCanvas.ActualWidth)
-                    {
-                        offsetX = 20;
-                        offsetY += 106;
-                    }
-
                     // do we have aliases for this system?
                     if (File.Exists(system.AliasPath))
                         system.RidAlias = AliasTools.LoadAliases(system.AliasPath);
 
                     fneSystemManager.AddFneSystem(system.Name, system, this);
-                    PeerSystem peer = fneSystemManager.GetFneSystem(system.Name);
+					PeerSystem peer = fneSystemManager.GetFneSystem(system.Name);
 
                     // hook FNE events
                     peer.peer.PeerConnected += (sender, response) =>
@@ -512,22 +517,72 @@ namespace dvmconsole
                         Log.WriteLine("FNE Peer connected");
                         Dispatcher.Invoke(() =>
                         {
-                            EnableCommandControls();
-                            systemStatusBox.Background = ChannelBox.GREEN_GRADIENT;
-                            systemStatusBox.ConnectionState = "Connected";
-                        });
-                    };
+                            //EnableCommandControls();
+                            sysregstate = true;
 
+                            currentsystem = system.Name;
+
+							string tmphc = regheadcode0.Text + regheadcode1.Text + regheadcode2.Text + regheadcode3.Text + regheadcode4.Text + regheadcode5.Text;
+							updateHeadcode(tmphc);
+							regheadcode0.Text = "";
+							regheadcode1.Text = "";
+							regheadcode2.Text = "";
+							regheadcode3.Text = "";
+							regheadcode4.Text = "";
+							regheadcode5.Text = "";
+
+							hc6entered = false;
+							hc5entered = false;
+							hc4entered = false;
+							hc3entered = false;
+							hc2entered = false;
+							hc1entered = false;
+
+							MediaPlayer mediaPlayer = new MediaPlayer();
+							mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/S_info.wav")));
+							mediaPlayer.Play();
+							UpdateRadioBackground("bg_main_hd_light.png");
+							headcodeb0.Visibility = Visibility.Visible;
+							headcodeb1.Visibility = Visibility.Visible;
+							headcodeb2.Visibility = Visibility.Visible;
+							headcodeb3.Visibility = Visibility.Visible;
+							headcodeb4.Visibility = Visibility.Visible;
+							headcodeb5.Visibility = Visibility.Visible;
+							isreging = false;
+							isregged = true;
+						});
+                    };
+                    
                     peer.peer.PeerDisconnected += (response) =>
                     {
                         Log.WriteLine("FNE Peer disconnected");
                         Dispatcher.Invoke(() =>
                         {
                             DisableCommandControls();
-                            systemStatusBox.Background = ChannelBox.RED_GRADIENT;
-                            systemStatusBox.ConnectionState = "Disconnected";
+                            sysregstate = false;
+							regheadcode0.Text = "";
+							regheadcode1.Text = "";
+							regheadcode2.Text = "";
+							regheadcode3.Text = "";
+							regheadcode4.Text = "";
+							regheadcode5.Text = "";
 
-                            foreach (ChannelBox channel in selectedChannelsManager.GetSelectedChannels())
+							hc6entered = false;
+							hc5entered = false;
+							hc4entered = false;
+							hc3entered = false;
+							hc2entered = false;
+							hc1entered = false;
+
+							MediaPlayer mediaPlayer = new MediaPlayer();
+							mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/S2_warning.wav")));
+							mediaPlayer.Play();
+							UpdateRadioBackground("sChregfail.png");
+							isreging = false;
+							isregged = false;
+
+
+							foreach (ChannelBox channel in selectedChannelsManager.GetSelectedChannels())
                             {
                                 if (channel.SystemName == PLAYBACKSYS || channel.ChannelName == PLAYBACKCHNAME || channel.DstId == PLAYBACKTG)
                                     continue;
@@ -555,13 +610,32 @@ namespace dvmconsole
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show($"Fatal error while connecting to server. {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+							sysregstate = false;
+							regheadcode0.Text = "";
+							regheadcode1.Text = "";
+							regheadcode2.Text = "";
+							regheadcode3.Text = "";
+							regheadcode4.Text = "";
+							regheadcode5.Text = "";
+
+							hc6entered = false;
+							hc5entered = false;
+							hc4entered = false;
+							hc3entered = false;
+							hc2entered = false;
+							hc1entered = false;
+
+							MediaPlayer mediaPlayer = new MediaPlayer();
+							mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/S2_warning.wav")));
+							mediaPlayer.Play();
+							UpdateRadioBackground("sChregfail.png");
+							isreging = false;
+							isregged = false;
+							MessageBox.Show($"Fatal error while connecting to server. {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                             Log.StackTrace(ex, false);
                         }
                     });
 
-                    if (!settingsManager.ShowSystemStatus)
-                        systemStatusBox.Visibility = Visibility.Collapsed;
                 }
             }
 
@@ -572,21 +646,19 @@ namespace dvmconsole
                 // iterate through the coeplug zones and begin building channel widgets
                 foreach (var zone in Codeplug.Zones)
                 {
-                    // iterate through zone channels
-                    foreach (var channel in zone.Channels)
-                    {
-                        ChannelBox channelBox = new ChannelBox(selectedChannelsManager, audioManager, channel.Name, channel.System, channel.Tgid, settingsManager.TogglePTTMode);
-                        channelBox.ChannelMode = channel.Mode.ToUpperInvariant();
-                        if (channel.GetAlgoId() != P25Defines.P25_ALGO_UNENCRYPT && channel.GetKeyId() > 0)
-                            channelBox.IsTxEncrypted = true;
+                    var channel = zone.Channels[0];
+                    ChannelBox channelBox = new ChannelBox(selectedChannelsManager, audioManager, channel.Name, channel.System, channel.Tgid, settingsManager.TogglePTTMode);
+                    channelBox.ChannelMode = channel.Mode.ToUpperInvariant();
+                    if (channel.GetAlgoId() != P25Defines.P25_ALGO_UNENCRYPT && channel.GetKeyId() > 0)
+                        channelBox.IsTxEncrypted = true;
 
-                        systemStatuses.Add(channel.Name, new SlotStatus());
+                     systemStatuses.Add(channel.Name, new SlotStatus());
 
-                        if (settingsManager.ChannelPositions.TryGetValue(channel.Name, out var position))
-                        {
-                            Canvas.SetLeft(channelBox, position.X);
-                            Canvas.SetTop(channelBox, position.Y);
-                        }
+                     if (settingsManager.ChannelPositions.TryGetValue(channel.Name, out var position))
+                     {
+                        Canvas.SetLeft(channelBox, position.X);
+                        Canvas.SetTop(channelBox, position.Y);
+                     }
                         else
                         {
                             Canvas.SetLeft(channelBox, offsetX);
@@ -594,8 +666,6 @@ namespace dvmconsole
                         }
 
                         channelBox.PTTButtonClicked += ChannelBox_PTTButtonClicked;
-                        channelBox.PTTButtonPressed += ChannelBox_PTTButtonPressed;
-                        channelBox.PTTButtonReleased += ChannelBox_PTTButtonReleased;
                         channelBox.PageButtonClicked += ChannelBox_PageButtonClicked;
                         channelBox.HoldChannelButtonClicked += ChannelBox_HoldChannelButtonClicked;
 
@@ -613,7 +683,7 @@ namespace dvmconsole
                             offsetX = 20;
                             offsetY += 116;
                         }
-                    }
+                        //channelBox.Visibility = Visibility.Hidden;
                 }
             }
 
@@ -1271,7 +1341,7 @@ namespace dvmconsole
             if (!string.IsNullOrEmpty(settingsManager.LastCodeplugPath) && File.Exists(settingsManager.LastCodeplugPath))
                 LoadCodeplug(settingsManager.LastCodeplugPath);
             else
-                GenerateChannelWidgets();
+                
 
             // set background configuration
             menuDarkMode.IsChecked = settingsManager.DarkMode;
@@ -1283,6 +1353,10 @@ namespace dvmconsole
 
 			regbackgroundworker1.DoWork += new DoWorkEventHandler(regbackgroundworker1_DoWork);
 			regbackgroundworker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(regbackgroundworker1_RunWorkerCompleted);
+
+			regbackgroundworker2.DoWork += new DoWorkEventHandler(regbackgroundworker2_DoWork);
+			regbackgroundworker2.RunWorkerCompleted += new RunWorkerCompletedEventHandler(regbackgroundworker2_RunWorkerCompleted);
+			regbackgroundworker2.WorkerSupportsCancellation = true;
 
 			chregbackgroundworker1.DoWork += new DoWorkEventHandler(chregbackgroundworker1_DoWork);
 			chregbackgroundworker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(chregbackgroundworker1_RunWorkerCompleted);
@@ -1648,9 +1722,7 @@ namespace dvmconsole
                 settingsManager.ShowChannels = widgetSelectionWindow.ShowChannels;
                 settingsManager.ShowAlertTones = widgetSelectionWindow.ShowAlertTones;
 
-                GenerateChannelWidgets();
-                if (!noSaveSettingsOnClose)
-                    settingsManager.SaveSettings();
+              
             }
         }
 
@@ -1940,55 +2012,46 @@ namespace dvmconsole
         /// <param name="sender"></param>
         /// <param name="e"></param>
         /// <exception cref="NotImplementedException"></exception>
-        private void ChannelBox_PTTButtonPressed(object sender, ChannelBox e)
+        private void ChannelBox_PTTButtonPressed()
         {
-            if (e.SystemName == PLAYBACKSYS || e.ChannelName == PLAYBACKCHNAME || e.DstId == PLAYBACKTG)
-                return;
 
-            if (!e.PttState)
+
+            if (!pttState)
             {
-                Codeplug.System system = Codeplug.GetSystemForChannel(e.ChannelName);
+                Codeplug.System system = Codeplug.GetSystemForChannel(currentchannel);
                 if (system == null)
                 {
-                    MessageBox.Show($"{e.ChannelName} refers to an {INVALID_SYSTEM} {e.SystemName}. {PLEASE_CHECK_CODEPLUG}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    e.IsSelected = false;
-                    selectedChannelsManager.RemoveSelectedChannel(e);
+                    MessageBox.Show($"{currentchannel} refers to an {INVALID_SYSTEM} {currentsystem}. {PLEASE_CHECK_CODEPLUG}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                Codeplug.Channel cpgChannel = Codeplug.GetChannelByName(e.ChannelName);
+                Codeplug.Channel cpgChannel = Codeplug.GetChannelByName(currentchannel);
                 if (cpgChannel == null)
                 {
                     // bryanb: this should actually never happen...
-                    MessageBox.Show($"{e.ChannelName} refers to an {INVALID_CODEPLUG_CHANNEL}. {PLEASE_CHECK_CODEPLUG}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    e.IsSelected = false;
-                    selectedChannelsManager.RemoveSelectedChannel(e);
+                    MessageBox.Show($"{currentchannel} refers to an {INVALID_CODEPLUG_CHANNEL}. {PLEASE_CHECK_CODEPLUG}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+ 
                     return;
                 }
 
                 PeerSystem fne = fneSystemManager.GetFneSystem(system.Name);
                 if (fne == null)
                 {
-                    MessageBox.Show($"{e.ChannelName} has a {ERR_INVALID_FNE_REF}. {PLEASE_RESTART_CONSOLE}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    e.IsSelected = false;
-                    selectedChannelsManager.RemoveSelectedChannel(e);
+                    MessageBox.Show($"{currentchannel} has a {ERR_INVALID_FNE_REF}. {PLEASE_RESTART_CONSOLE}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+ 
                     return;
                 }
 
-                if (!e.IsSelected)
-                    return;
+                FneUtils.Memset(mi, 0x00, P25Defines.P25_MI_LENGTH);
 
-                FneUtils.Memset(e.mi, 0x00, P25Defines.P25_MI_LENGTH);
+				uint srcId = uint.Parse(Convert.ToInt64(headcode, 16).ToString());
+				uint dstId = uint.Parse(currentdestID);
 
-                uint srcId = uint.Parse(system.Rid);
-                uint dstId = uint.Parse(cpgChannel.Tgid);
+				if (TxStreamId != 0)
+                    Log.WriteWarning($"{currentchannel} CHANNEL still had a TxStreamId? This shouldn't happen.");
 
-                if (e.TxStreamId != 0)
-                    Log.WriteWarning($"{e.ChannelName} CHANNEL still had a TxStreamId? This shouldn't happen.");
-
-                e.TxStreamId = fne.NewStreamId();
-                Log.WriteLine($"({system.Name}) {e.ChannelMode.ToUpperInvariant()} Traffic *CALL START     * SRC_ID {srcId} TGID {dstId} [STREAM ID {e.TxStreamId}]");
-                e.VolumeMeterLevel = 0;
+                TxStreamId = fne.NewStreamId();
+                Log.WriteLine($"({system.Name}) {currentmode.ToUpperInvariant()} Traffic *CALL START     * SRC_ID {srcId} TGID {dstId} [STREAM ID {TxStreamId}]");
                 if (cpgChannel.GetChannelMode() == Codeplug.ChannelMode.P25)
                     fne.SendP25TDU(srcId, dstId, true);
             }
@@ -2333,7 +2396,7 @@ namespace dvmconsole
         private void btnAlert1_Click(object sender, RoutedEventArgs e)
         {
             Dispatcher.Invoke(() => {
-                SendAlertTone(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/alert1.wav"));
+                SendAlertTone(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/alert1.wav"));
             });
         }
 
@@ -2346,7 +2409,7 @@ namespace dvmconsole
         {
             Dispatcher.Invoke(() =>
             {
-                SendAlertTone(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/alert2.wav"));
+                SendAlertTone(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/alert2.wav"));
             });
         }
 
@@ -2632,7 +2695,7 @@ namespace dvmconsole
 		{
 			UpdateRadioBackground("bg_main_hd_light.png");
 		}
-
+        private int regBgWkrstatus { get; set; } //1-Reg Ok 2 - Reg Fail - 3 RegTimeout
 		private void regbackgroundworker1_DoWork(object sender, DoWorkEventArgs e)
 		{
 			BackgroundWorker worker = sender as BackgroundWorker;
@@ -2656,6 +2719,21 @@ namespace dvmconsole
 			} while (hc1entered == false);
 		}
 
+        private async void regtimeouttimerTick(object sender, ElapsedEventArgs e) 
+        {
+            if (sysregstate == false) 
+            {
+				UpdateRadioBackground("sChregfail.png");
+			}
+        }
+
+		private void regbackgroundworker2_DoWork(object sender, DoWorkEventArgs e) 
+        {
+        }
+        private void regbackgroundworker2_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) 
+        {
+		}
+        private System.Timers.Timer regtimeouttimer = new System.Timers.Timer();
 		private void regbackgroundworker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
 			string tmphc = regheadcode0.Text + regheadcode1.Text + regheadcode2.Text + regheadcode3.Text + regheadcode4.Text + regheadcode5.Text;
@@ -2666,36 +2744,15 @@ namespace dvmconsole
                 {
                     if (tmphcint <= 16777214)
                     {
-                        updateHeadcode(tmphc);
-                        regheadcode0.Text = "";
-                        regheadcode1.Text = "";
-                        regheadcode2.Text = "";
-                        regheadcode3.Text = "";
-                        regheadcode4.Text = "";
-                        regheadcode5.Text = "";
-
-                        hc6entered = false;
-                        hc5entered = false;
-                        hc4entered = false;
-                        hc3entered = false;
-                        hc2entered = false;
-                        hc1entered = false;
-
-                        MediaPlayer mediaPlayer = new MediaPlayer();
-                        mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/S_info.wav")));
-                        mediaPlayer.Play();
-                        UpdateRadioBackground("bg_main_hd_light.png");
-                        headcodeb0.Visibility = Visibility.Visible;
-                        headcodeb1.Visibility = Visibility.Visible;
-                        headcodeb2.Visibility = Visibility.Visible;
-                        headcodeb3.Visibility = Visibility.Visible;
-                        headcodeb4.Visibility = Visibility.Visible;
-                        headcodeb5.Visibility = Visibility.Visible;
-                        isreging = false;
-                        isregged = true;
-                        //GenerateChannelWidgets();
-                        //EnableControls();
-                    }
+                        regtimeouttimer.Enabled= true;
+                        regtimeouttimer.Interval = 30000;
+						UpdateRadioBackground("registering.png");
+                        regtimeouttimer.Elapsed += regtimeouttimerTick;
+                        regtimeouttimer.AutoReset = false;
+                        regtimeouttimer.Start();
+						GenerateChannelWidgets();
+                        EnableControls();
+					}
                     else 
                     {
 						MediaPlayer mediaPlayer = new MediaPlayer();
@@ -2803,7 +2860,9 @@ namespace dvmconsole
 		{
             if (dereging == true) 
             {
-                dereging = false;
+				PeerSystem peer = fneSystemManager.GetFneSystem(currentsystem);
+				peer.Stop();
+				dereging = false;
 				UpdateRadioBackground("bg_main_hd_light.png");
 				headcodeb0.Visibility = Visibility.Hidden;
 				headcodeb1.Visibility = Visibility.Hidden;
@@ -2835,6 +2894,8 @@ namespace dvmconsole
 				chnameP11.Text = "";
 				currentchannel = "";
                 currentsystem = "";
+                currentdestID = "";
+                currentmode = "p25";
 			}
             else if (isreging == true)
             {
@@ -3712,13 +3773,14 @@ namespace dvmconsole
 
         private void volbackgroundworker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
+            audioManager.SetTalkgroupVolume(currentdestID, (float)volume);
 		    UpdateRadioBackground("bg_main_hd_light.png");
 		}
 
 		private void chregbackgroundworker1_DoWork(object sender, DoWorkEventArgs e) 
         {
             Thread.Sleep(1500);
-            //TODO: Add DVM channel switching logic here
+            
 		}
 
         private void chregbackgroundworker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) 
@@ -3860,18 +3922,79 @@ namespace dvmconsole
         /// <param name="e"></param>
 		private void pttButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		{
+			if (IsTxEncrypted && !Crypter.HasKey())
+			{
+				//TODO: Move this to a Radio Error
+				MessageBox.Show($"{currentchannel} {"ERR_NO_LOADED_ENC_KEY"}.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				pttState = false;
+				return;
+			}
+
+			pttState = true;
+			ChannelBox_PTTButtonPressed();
 
 		}
 
-        /// <summary>
-        /// PTT Release
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+
+		/// <summary>
+		/// PTT Release
+		/// </summary>
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
 		private void pttButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
 		{
             ChannelBox_PTTButtonReleased();
 			pttState = false;
+		}
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void SysRegStateChange() 
+        {
+            if (sysregstate == false && isregged==true)
+            {
+				//Registration Lost
+				regheadcode0.Text = "S";
+				regheadcode1.Text = "y";
+				regheadcode2.Text = "s";
+				regheadcode3.Text = "";
+				regheadcode4.Text = "C";
+				regheadcode5.Text = "o";
+				ridaliasP6.Text = "n";
+				ridaliasP7.Text = "n";
+				ridaliasP8.Text = "";
+				ridaliasP9.Text = "L";
+				ridaliasP10.Text = "S";
+				ridaliasP11.Text = "T";
+			}
+            else if (sysregstate == true) 
+            {
+            
+            }
+        }
+
+		private void pttButton_Click(object sender, RoutedEventArgs e)
+		{
+            if (pttState == false) 
+            {
+				if (IsTxEncrypted && !Crypter.HasKey())
+				{
+					//TODO: Move this to a Radio Error
+					MessageBox.Show($"{currentchannel} {"ERR_NO_LOADED_ENC_KEY"}.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+					pttState = false;
+					return;
+				}
+
+				pttState = true;
+				ChannelBox_PTTButtonPressed();
+			}
+            if (pttState == true) 
+            {
+				ChannelBox_PTTButtonReleased();
+				pttState = false;
+			}
+			
 		}
 	} // public partial class MainWindow : Window
 } // namespace dvmconsole

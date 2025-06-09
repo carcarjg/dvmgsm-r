@@ -89,7 +89,7 @@
 
 				<!-- Global PTT -->
 				<Button x:Name="btnGlobalPtt" Height="42" Width="110" ToolTip="Global PTT" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
-                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}" PreviewMouseLeftButtonDown="btnGlobalPtt_MouseLeftButtonDown" PreviewMouseLeftButtonUp="btnGlobalPtt_MouseLeftButtonUp">
 					<Image HorizontalAlignment="Center" VerticalAlignment="Center" Width="64" Height="48" Source="/dvmconsole;component/Assets/instantptt.png" IsHitTestVisible="False">
 						<Image.OpacityMask>
 							<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
@@ -188,7 +188,7 @@
 				<Button x:Name="zeroButton" Canvas.Left="640" Canvas.Top="213" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="zeroButton_Click" BorderBrush="{x:Null}" />
 				<Button x:Name="sgButton" Canvas.Left="765" Canvas.Top="83" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="sgButton_Click" BorderBrush="{x:Null}" />
 				<Button x:Name="pbookButton" Canvas.Left="764" Canvas.Top="149" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" BorderBrush="{x:Null}" Click="pbookButton_Click" />
-				<Button x:Name="pttButton" Canvas.Left="763" Canvas.Top="213" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" MouseLeftButtonDown="pttButton_MouseLeftButtonDown" MouseLeftButtonUp="pttButton_MouseLeftButtonUp" />
+				<Button x:Name="pttButton" Canvas.Left="763" Canvas.Top="213" Height="35" Width="39" Background="Black" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" MouseLeftButtonDown="pttButton_MouseLeftButtonDown" MouseLeftButtonUp="pttButton_MouseLeftButtonUp" Click="pttButton_Click" />
 				<Button x:Name="volupButton" Canvas.Left="508" Canvas.Top="215" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" Click="volupButton_Click" />
 				<Button x:Name="voldnButton" Canvas.Left="451" Canvas.Top="216" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" Click="voldnButton_Click" />
 				<Button x:Name="muButton" Canvas.Left="388" Canvas.Top="218" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" />
