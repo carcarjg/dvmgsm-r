@@ -28,7 +28,7 @@ The GSM-R software requires the library dependancies below. Generally, the softw
 
 Please note that while, x64 CPU types are supported, it will require compiling the dvmvocoder library separately for that CPU architecture.
 
-## dvmconsole Configuration
+## DVM GSM-R Configuration
 
 1. Create/Edit `codeplug.yml` (example codeplug is provided in the configs directory).
 2. Start `dvmconsole`.
