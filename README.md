@@ -4,7 +4,7 @@ The Digital Voice Modem Global System for Mobile Communications – Railway (GSM
 DVM users to listen to one talkgroup on a DVM FNE from a single application using a Siemens GSM-R look and feel.
 
 
-![image]([https://github.com/user-attachments/assets/062c367a-cbfa-4fa7-a06f-4adf3abddf2c](https://github.com/carcarjg/dvmgsm-r/blob/main/repo/ss01.PNG?raw=true))
+![image](https://github.com/user-attachments/assets/062c367a-cbfa-4fa7-a06f-4adf3abddf2c)
 
 
 ## ToDo
