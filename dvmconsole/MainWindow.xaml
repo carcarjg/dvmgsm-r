@@ -1,0 +1,260 @@
+﻿<Window x:Class="dvmconsole.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:dvmconsole.Controls"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Digital Voice Modem - GSM-R" Height="380" Width="850"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}" TextElement.FontWeight="Regular" TextElement.FontSize="13"
+        Style="{StaticResource MaterialDesignWindow}" FontFamily="{DynamicResource MaterialDesignFont}"
+        Icon="/dvmconsole;component/Assets/AppIcon.ico" ResizeMode="NoResize" Background="{DynamicResource {x:Static SystemColors.MenuBarBrushKey}}">
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="497*"/>
+			<ColumnDefinition Width="3*"/>
+		</Grid.ColumnDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="24"/>
+			<RowDefinition Height="52" />
+			<RowDefinition Height="*"/>
+		</Grid.RowDefinitions>
+
+		<Menu materialDesign:MenuAssist.TopLevelMenuItemHeight="24" Grid.ColumnSpan="2">
+			<MenuItem Header="_File">
+				<MenuItem Header="_Open Codeplug..." Click="OpenCodeplug_Click" />
+				<Separator />
+				<MenuItem Header="_Exit" Click="Exit_Click" />
+			</MenuItem>
+			<MenuItem Header="_Commands">
+				<MenuItem Header="_Page Subscriber" Click="PageRID_Click" x:Name="menuPageSubscriber" />
+				<MenuItem Header="Radio _Check Subscriber" Click="RadioCheckRID_Click" x:Name="menuRadioCheckSubscriber" />
+				<Separator />
+				<MenuItem Header="_Inhibit Subscriber" Click="InhibitRID_Click" x:Name="menuInhibitSubscriber" />
+				<MenuItem Header="_Uninhibit Subscriber" Click="UninhibitRID_Click" x:Name="menuUninhibitSubscriber" />
+				<Separator />
+				<MenuItem Header="_QuickCall II" Click="ManualPage_Click" x:Name="menuQuickCall2" />
+			</MenuItem>
+			<MenuItem Header="_Settings">
+				<MenuItem Header="_Toggle Push To Talk Mode" IsCheckable="True" Checked="TogglePTTMode_Click" Unchecked="TogglePTTMode_Click" x:Name="menuTogglePTTMode" />
+				<MenuItem Header="_Global PTT Keys All Channels" IsCheckable="True" Checked="ToggleGlobalPTTAllChannels_Click" Unchecked="ToggleGlobalPTTAllChannels_Click" x:Name="menuToggleGlobalPTTMode" />
+				<Separator />
+				<MenuItem Header="_Audio Settings" Click="AudioSettings_Click" />
+				<MenuItem Header="_Reset Settings" Click="ResetSettings_Click" />
+				<Separator />
+				<MenuItem Header="_Select Widgets to Display" Click="SelectWidgets_Click" />
+				<Separator />
+				<MenuItem Header="Alerts">
+					<MenuItem Header="Add Alert Tone" Click="AddAlertTone_Click" />
+				</MenuItem>
+				<Separator />
+				<MenuItem Header="Keyboard Shortcuts">
+					<MenuItem Header="Set Global PTT Keybind" Click="SetGlobalPTTKeybind"></MenuItem>
+				</MenuItem>
+			</MenuItem>
+			<MenuItem Header="_View">
+				<MenuItem Header="Select _User Background..." Click="OpenUserBackground_Click" x:Name="menuUserBackground" />
+				<Separator />
+				<MenuItem Header="_Dark Mode" IsCheckable="True" Checked="ToggleDarkMode_Click" Unchecked="ToggleDarkMode_Click" x:Name="menuDarkMode" />
+				<Separator />
+				<MenuItem Header="_Lock Widgets" IsCheckable="True" Checked="ToggleLockWidgets_Click" Unchecked="ToggleLockWidgets_Click" x:Name="menuToggleLockWidgets" />
+				<MenuItem Header="_Fit Channel Display to Window Size" Click="ResizeCanvasToWindow_Click" x:Name="menuFitToWindow" />
+				<MenuItem Header="_Snap Call History To Window" IsCheckable="True" Checked="ToggleSnapCallHistory_Click" Unchecked="ToggleSnapCallHistory_Click" x:Name="menuSnapCallHistory" />
+				<Separator />
+				<MenuItem Header="_Always on Top" IsCheckable="True" Checked="ToggleKeepWindowOnTop_Click" Unchecked="ToggleKeepWindowOnTop_Click" x:Name="menuKeepWindowOnTop" />
+			</MenuItem>
+		</Menu>
+
+		<ToolBarTray Grid.Row="1">
+			<ToolBar ClipToBounds="False" Style="{StaticResource MaterialDesignToolBar}">
+				<!-- Application Banner -->
+				<Image Width="224" Height="50" VerticalAlignment="Center" HorizontalAlignment="Left" Source="/dvmconsole;component/Assets/logo.png" Stretch="UniformToFill">
+					<Image.RenderTransform>
+						<TransformGroup>
+							<ScaleTransform/>
+							<SkewTransform AngleY="-0.164"/>
+							<RotateTransform/>
+							<TranslateTransform Y="-0.247"/>
+						</TransformGroup>
+					</Image.RenderTransform>
+				</Image>
+
+				<Separator Visibility="Hidden" />
+
+				<!-- Open Codeplug -->
+				<Button Height="42" Width="42" Click="OpenCodeplug_Click" ToolTip="Open Codeplug" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}" Visibility="Hidden">
+					<Image HorizontalAlignment="Left" VerticalAlignment="Center" Width="32" Height="32" Source="/dvmconsole;component/Assets/config.png" IsHitTestVisible="False" />
+				</Button>
+
+				<Separator Visibility="Hidden" />
+
+				<!-- Global PTT -->
+				<Button x:Name="btnGlobalPtt" Height="42" Width="110" ToolTip="Global PTT" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+					<Image HorizontalAlignment="Center" VerticalAlignment="Center" Width="64" Height="48" Source="/dvmconsole;component/Assets/instantptt.png" IsHitTestVisible="False">
+						<Image.OpacityMask>
+							<LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+								<GradientStop Color="Black"/>
+								<GradientStop Color="White" Offset="1"/>
+							</LinearGradientBrush>
+						</Image.OpacityMask>
+					</Image>
+				</Button>
+
+				<Separator />
+
+				<!-- Alert Tone 1, 2 and 3 -->
+				<Button x:Name="btnAlert1" Height="42" Width="42" Click="btnAlert1_Click" FontSize="10" FontFamily="Arial" ToolTip="Alert Tone 1" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+					<StackPanel Width="42">
+						<Image HorizontalAlignment="Center" Width="32" Height="30" Source="/dvmconsole;component/Assets/alerttone.png" IsHitTestVisible="False" />
+						<TextBlock TextAlignment="Center">1</TextBlock>
+					</StackPanel>
+				</Button>
+				<Button x:Name="btnAlert2" Height="42" Width="42" Click="btnAlert2_Click" FontSize="10" FontFamily="Arial" ToolTip="Alert Tone 2" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+					<StackPanel Width="42">
+						<Image HorizontalAlignment="Center" Width="32" Height="30" Source="/dvmconsole;component/Assets/alerttone.png" IsHitTestVisible="False" />
+						<TextBlock TextAlignment="Center">2</TextBlock>
+					</StackPanel>
+				</Button>
+				<Button x:Name="btnAlert3" Height="42" Width="42" Click="btnAlert3_Click" FontSize="10" FontFamily="Arial" ToolTip="Alert Tone 3" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+					<StackPanel Width="42">
+						<Image HorizontalAlignment="Center" Width="32" Height="30" Source="/dvmconsole;component/Assets/alerttone.png" IsHitTestVisible="False" />
+						<TextBlock TextAlignment="Center">3</TextBlock>
+					</StackPanel>
+				</Button>
+
+				<Separator />
+
+				<!-- Page Subscriber -->
+				<Button x:Name="btnPageSub" Height="42" Width="42" Click="PageRID_Click" ToolTip="Page Subscriber" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+					<Image HorizontalAlignment="Left" VerticalAlignment="Center" Width="32" Height="32" Source="/dvmconsole;component/Assets/page.png" IsHitTestVisible="False" />
+				</Button>
+
+				<Separator />
+
+				<!-- Select/Unselect All -->
+				<Button x:Name="btnSelectAll" Height="42" Width="42" Click="SelectAll_Click" ToolTip="Select All/Unselect All" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+					<Image HorizontalAlignment="Left" VerticalAlignment="Center" Width="32" Height="32" Source="/dvmconsole;component/Assets/select.png" IsHitTestVisible="False" />
+				</Button>
+
+				<Separator />
+
+				<!-- Encryption Key Information -->
+				<Button x:Name="btnKeyStatus" Height="42" Width="42" Click="KeyStatus_Click" ToolTip="Encryption Key Information" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+					<Image HorizontalAlignment="Left" VerticalAlignment="Center" Width="32" Height="32" Source="/dvmconsole;component/Assets/key.png" IsHitTestVisible="False" />
+				</Button>
+
+				<Separator />
+
+				<!-- Call History -->
+				<Button x:Name="btnCallHistory" Height="42" Width="42" Click="CallHist_Click" ToolTip="Call History" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+					<Image HorizontalAlignment="Left" VerticalAlignment="Center" Width="32" Height="32" Source="/dvmconsole;component/Assets/history.png" IsHitTestVisible="False" />
+				</Button>
+
+				<Separator />
+
+				<!-- Audio Settings -->
+				<Button x:Name="btnAudioSettings" Height="42" Width="42" Click="AudioSettings_Click" ToolTip="Audio Settings" materialDesign:ButtonAssist.CornerRadius="5" Padding="0"
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}" Style="{StaticResource MaterialDesignPaperDarkButton}">
+					<Image HorizontalAlignment="Left" VerticalAlignment="Center" Width="32" Height="32" Source="/dvmconsole;component/Assets/audio.png" IsHitTestVisible="False" />
+				</Button>
+			</ToolBar>
+		</ToolBarTray>
+
+		<!-- Channel Widget Canvas -->
+		<ScrollViewer x:Name="canvasScrollViewer" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Disabled" Grid.Row="3" Grid.ColumnSpan="2">
+			<ScrollViewer.Background>
+				<ImageBrush x:Name="canvasBG" ImageSource="/bg_main_hd_dark.png" Stretch="Uniform"/>
+			</ScrollViewer.Background>
+			<Canvas x:Name="channelsCanvas" VerticalAlignment="Top">
+				<Button x:Name="regButton" Canvas.Left="766" Canvas.Top="19" Height="35" Width="39" Background="{x:Null}" Click="regButton_Click" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" />
+				<Button x:Name="checkButton" Canvas.Left="575" Canvas.Top="214" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="checkButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="cansbutton" Canvas.Left="702" Canvas.Top="213" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="cansbutton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="onebutton" Canvas.Left="574" Canvas.Top="19" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Click="onebutton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="twoabcButton" Canvas.Left="638" Canvas.Top="19" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Click="twoabcButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="threedefButton" Canvas.Left="700" Canvas.Top="19" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Center" Click="threedefButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="fourghiButton" Canvas.Left="575" Canvas.Top="82" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" Click="fourghiButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="fivejklButton" Canvas.Left="639" Canvas.Top="83" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="fivejklButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="sixmnoButton" Canvas.Left="700" Canvas.Top="83" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="sixmnoButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="sevenpqrsButton" Canvas.Left="577" Canvas.Top="148" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="sevenpqrsButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="eighttuvButton" Canvas.Left="640" Canvas.Top="148" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="eighttuvButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="ninewxyzButton" Canvas.Left="700" Canvas.Top="147" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="ninewxyzButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="zeroButton" Canvas.Left="640" Canvas.Top="213" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="zeroButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="sgButton" Canvas.Left="765" Canvas.Top="83" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" Click="sgButton_Click" BorderBrush="{x:Null}" />
+				<Button x:Name="pbookButton" Canvas.Left="764" Canvas.Top="149" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" BorderBrush="{x:Null}" Click="pbookButton_Click" />
+				<Button x:Name="pttButton" Canvas.Left="763" Canvas.Top="213" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" MouseLeftButtonDown="pttButton_MouseLeftButtonDown" MouseLeftButtonUp="pttButton_MouseLeftButtonUp" />
+				<Button x:Name="volupButton" Canvas.Left="508" Canvas.Top="215" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" Click="volupButton_Click" />
+				<Button x:Name="voldnButton" Canvas.Left="451" Canvas.Top="216" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" Click="voldnButton_Click" />
+				<Button x:Name="muButton" Canvas.Left="388" Canvas.Top="218" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" />
+				<Button x:Name="tButton" Canvas.Left="328" Canvas.Top="218" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" BorderBrush="{x:Null}" />
+				<Button x:Name="brightupButton" Canvas.Left="267" Canvas.Top="217" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Center" VerticalAlignment="Top" BorderBrush="{x:Null}" />
+				<Button x:Name="brightdnButton" Canvas.Left="208" Canvas.Top="216" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" />
+				<Button x:Name="stButton" Canvas.Left="147" Canvas.Top="218" Height="35" Width="39" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" />
+				<Button x:Name="sigButton" Canvas.Left="37" Canvas.Top="158" Height="90" Width="83" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" />
+				<Button x:Name="emrgButton" Canvas.Left="35" Canvas.Top="27" Height="89" Width="83" Background="{x:Null}" HorizontalAlignment="Left" VerticalAlignment="Center" BorderBrush="{x:Null}" />
+				<TextBlock x:Name="headcodeb5" HorizontalAlignment="Left" VerticalAlignment="Center" Width="16" Canvas.Left="506" Canvas.Top="58" Height="30"  FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" />
+				<TextBlock x:Name="headcodeb4" Width="16" Canvas.Left="489" Canvas.Top="58" Height="29" HorizontalAlignment="Left" VerticalAlignment="Center" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" />
+				<TextBlock x:Name="headcodeb3" Width="16" Canvas.Left="470" Canvas.Top="58" Height="29" HorizontalAlignment="Left" VerticalAlignment="Center" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" />
+				<TextBlock x:Name="headcodeb2" Width="16" Canvas.Left="452" Canvas.Top="58" Height="29" HorizontalAlignment="Left" VerticalAlignment="Center" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" />
+				<TextBlock x:Name="headcodeb1" Width="16" Canvas.Left="434" Canvas.Top="58" Height="30" HorizontalAlignment="Left" VerticalAlignment="Center" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" />
+				<TextBlock x:Name="headcodeb0" Width="16" Canvas.Left="416" Canvas.Top="58" Height="29" HorizontalAlignment="Left" VerticalAlignment="Center" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" />
+				<TextBlock x:Name="regheadcode0" Width="16" Canvas.Left="176" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center" />
+				<TextBlock x:Name="regheadcode1" Width="16" Canvas.Left="196" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center" />
+				<TextBlock x:Name="regheadcode2" Width="16" Canvas.Left="212" Canvas.Top="116" Height="30" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center" />
+				<TextBlock x:Name="regheadcode3" Width="16" Canvas.Left="230" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center" />
+				<TextBlock x:Name="regheadcode4" Width="16" Canvas.Left="247" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center" />
+				<TextBlock x:Name="regheadcode5" Width="16" Canvas.Left="263" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center" />
+				<TextBlock x:Name="chnameP0" Width="16" Canvas.Left="176" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"/>
+				<TextBlock x:Name="chnameP1" Width="16" Canvas.Left="194" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chnameP2" Width="16" Canvas.Left="212" Canvas.Top="148" Height="30" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chnameP3" Width="16" Canvas.Left="230" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chnameP4" Width="16" Canvas.Left="247" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chnameP5" Width="16" Canvas.Left="263" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chnameP6" Width="16" Canvas.Left="282" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chnameP7" Width="16" Canvas.Left="299" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chnameP8" Width="16" Canvas.Left="315" Canvas.Top="148" Height="30" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chnameP9" Width="16" Canvas.Left="333" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chnameP10" Width="16" Canvas.Left="350" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chnameP11" Width="16" Canvas.Left="367" Canvas.Top="148" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="ridaliasP6" Width="16" Canvas.Left="281" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center"  />
+				<TextBlock x:Name="ridaliasP7" Width="16" Canvas.Left="298" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center"  />
+				<TextBlock x:Name="ridaliasP8" Width="16" Canvas.Left="315" Canvas.Top="116" Height="30" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center"  />
+				<TextBlock x:Name="ridaliasP9" Width="16" Canvas.Left="333" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center"  />
+				<TextBlock x:Name="ridaliasP10" Width="16" Canvas.Left="350" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center"  />
+				<TextBlock x:Name="ridaliasP11" Width="16" Canvas.Left="366" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center"  />
+				<TextBlock x:Name="chListP0" Width="16" Canvas.Left="178" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListP1" Width="16" Canvas.Left="194" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListP2" Width="16" Canvas.Left="210" Canvas.Top="89" Height="30" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListP3" Width="16" Canvas.Left="228" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListP4" Width="16" Canvas.Left="245" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListP5" Width="16" Canvas.Left="263" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListP6" Width="16" Canvas.Left="281" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListP7" Width="16" Canvas.Left="298" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListP8" Width="16" Canvas.Left="315" Canvas.Top="89" Height="30" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListP9" Width="16" Canvas.Left="333" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListP10" Width="16" Canvas.Left="350" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListP11" Width="16" Canvas.Left="366" Canvas.Top="89" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListR0P0" Width="16" Canvas.Left="178" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListR0P1" Width="16" Canvas.Left="194" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListR0P2" Width="16" Canvas.Left="210" Canvas.Top="58" Height="30" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListR0P3" Width="16" Canvas.Left="228" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListR0P4" Width="16" Canvas.Left="245" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListR0P5" Width="16" Canvas.Left="261" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top" />
+				<TextBlock x:Name="chListR0P6" Width="16" Canvas.Left="281" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListR0P7" Width="16" Canvas.Left="298" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListR0P8" Width="16" Canvas.Left="315" Canvas.Top="58" Height="30" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListR0P9" Width="16" Canvas.Left="333" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListR0P10" Width="16" Canvas.Left="350" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chListR0P11" Width="16" Canvas.Left="366" Canvas.Top="58" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Center" VerticalAlignment="Top"  />
+				<TextBlock x:Name="chSelArrowP0" Width="16" Canvas.Left="420" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center"  />
+				<TextBlock x:Name="chSelArrowP1" Width="16" Canvas.Left="438" Canvas.Top="116" Height="29" FontFamily="./Fonts/#Medodica" FontSize="36" Foreground="#FF1BD5F7" HorizontalAlignment="Left" VerticalAlignment="Center"  />
+			</Canvas>
+		</ScrollViewer>
+	</Grid>
+</Window>

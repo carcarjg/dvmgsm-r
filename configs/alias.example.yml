@@ -1,0 +1,11 @@
+#
+# Digital Voice Modem - GSM-R
+#
+#
+# Radio Alias example
+#- alias: "System"
+#  rid: 1
+
+
+- alias: "Radio 1"
+  rid: 1

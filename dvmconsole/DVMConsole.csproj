@@ -1,0 +1,223 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <Deterministic>False</Deterministic>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <Configurations>Debug;Release;WIN32</Configurations>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Copyright>Copyright (c) 2025 Caleb, K4PHP and DVMProject (https://github.com/dvmproject) Authors.</Copyright>
+    <PlatformTarget>x86</PlatformTarget>
+    <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
+    <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
+    <Title>Digital Voice Modem - Desktop Dispatch Console</Title>
+    <Authors>Caleb, K4PHP and DVMProject (https://github.com/dvmproject) Authors</Authors>
+    <Company>DVMProject</Company>
+    <Product>Digital Voice Modem - Desktop Dispatch Console</Product>
+    <PackageProjectUrl>https://github.com/DVMProject/dvmconsole</PackageProjectUrl>
+    <PackageIcon>AppIcon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/DVMProject/dvmconsole</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <AssemblyVersion>1.0.*</AssemblyVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="alerttone.png" />
+    <None Remove="Assets\alerttone.png" />
+    <None Remove="Assets\AppIcon.ico" />
+    <None Remove="Assets\audio.png" />
+    <None Remove="Assets\bg_main_hd_dark.png" />
+    <None Remove="Assets\bg_main_hd_light.png" />
+    <None Remove="Assets\channelmarker.png" />
+    <None Remove="Assets\clearemerg.png" />
+    <None Remove="Assets\config.png" />
+    <None Remove="Assets\connection.png" />
+    <None Remove="Assets\history.png" />
+    <None Remove="Assets\instantptt.png" />
+    <None Remove="Assets\key.png" />
+    <None Remove="Assets\page.png" />
+    <None Remove="Assets\pageselect.png" />
+    <None Remove="Assets\pttselect.png" />
+    <None Remove="Assets\registering.png" />
+    <None Remove="Assets\schaskRegCode.png" />
+    <None Remove="Assets\schboot.png" />
+    <None Remove="Assets\schcondereg.png" />
+    <None Remove="Assets\schdereging.png" />
+    <None Remove="Assets\schvol0.png" />
+    <None Remove="Assets\schvol1.png" />
+    <None Remove="Assets\schvol2.png" />
+    <None Remove="Assets\schvol3.png" />
+    <None Remove="Assets\schvol4.png" />
+    <None Remove="Assets\select.png" />
+    <None Remove="Assets\shincomingcall.png" />
+    <None Remove="Assets\shincomingfull.png" />
+    <None Remove="Assets\whackerlink-logo.png" />
+    <None Remove="Assets\WhackerLinkLogoV2.png" />
+    <None Remove="bg_main_hd_dark.png" />
+    <None Remove="bg_main_hd_light.png" />
+    <None Remove="clearemerg.png" />
+    <None Remove="connection.png" />
+    <None Remove="Fonts\MedodicaRegular.otf" />
+    <None Remove="page.png" />
+    <None Remove="whackerlink-logo.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\schvol0.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\alerttone.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\AppIcon.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\AppIcon.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\audio.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\bg_main_hd_dark.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\bg_main_hd_light.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\config.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\history.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\key.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\registering.png" />
+    <Resource Include="Assets\schaskRegCode.png" />
+    <Resource Include="Assets\schboot.png" />
+    <Resource Include="Assets\schcondereg.png" />
+    <Resource Include="Assets\schdereging.png" />
+    <Resource Include="Assets\schvol1.png" />
+    <Resource Include="Assets\schvol2.png" />
+    <Resource Include="Assets\schvol3.png" />
+    <Resource Include="Assets\schvol4.png" />
+    <Resource Include="Assets\select.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+ 
+
+  <ItemGroup>
+    <PackageReference Include="MaterialDesignThemes" Version="5.2.1" />
+    <PackageReference Include="NAudio" Version="2.2.1" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NWaves" Version="0.9.6" />
+    <PackageReference Include="YamlDotNet" Version="16.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\fnecore\fnecore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\channelmarker.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\clearemerg.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\connection.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\logo.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\instantptt.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\page.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\pageselect.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\pttselect.png">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\shincomingcall.png" />
+    <Resource Include="Assets\shincomingfull.png" />
+    <Resource Include="bg_main_hd_dark.png" />
+    <Resource Include="bg_main_hd_light.png" />
+    <Resource Include="Fonts\MedodicaRegular.otf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Assets\AppIcon.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="Audio\alert1.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Audio\alert2.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Audio\alert3.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Audio\emergency.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Audio\hold.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Audio\S2_warning.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Audio\S_info.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="codeplugs\codeplug.yml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Controls\ChannelBox.xaml">
+      <CopyToOutputDirectory></CopyToOutputDirectory>
+    </Page>
+  </ItemGroup>
+
+</Project>
