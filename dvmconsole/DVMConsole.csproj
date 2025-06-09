@@ -48,6 +48,7 @@
     <None Remove="Assets\schboot.png" />
     <None Remove="Assets\schcondereg.png" />
     <None Remove="Assets\schdereging.png" />
+    <None Remove="Assets\sChregfail.png" />
     <None Remove="Assets\schvol0.png" />
     <None Remove="Assets\schvol1.png" />
     <None Remove="Assets\schvol2.png" />
@@ -68,6 +69,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Assets\sChregfail.png" />
     <Resource Include="Assets\schvol0.png" />
   </ItemGroup>
 
