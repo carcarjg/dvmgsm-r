@@ -668,11 +668,14 @@ namespace dvmconsole
                         channelBox.PTTButtonClicked += ChannelBox_PTTButtonClicked;
                         channelBox.PageButtonClicked += ChannelBox_PageButtonClicked;
                         channelBox.HoldChannelButtonClicked += ChannelBox_HoldChannelButtonClicked;
-
+                        channelBox.IsSelected = true;
+                        channelBox.IsPrimary = true;
+                        channelBox.IsEnabled = true;
                         // widget placement
                         channelBox.MouseRightButtonDown += ChannelBox_MouseRightButtonDown;
                         channelBox.MouseRightButtonUp += ChannelBox_MouseRightButtonUp;
                         channelBox.MouseMove += ChannelBox_MouseMove;
+                        selectedChannelsManager.AddSelectedChannel(channelBox);
 
                         channelsCanvas.Children.Add(channelBox);
 
@@ -683,7 +686,7 @@ namespace dvmconsole
                             offsetX = 20;
                             offsetY += 116;
                         }
-                        //channelBox.Visibility = Visibility.Hidden;
+                        channelBox.Visibility = Visibility.Hidden;
                 }
             }
 
@@ -2043,8 +2046,8 @@ namespace dvmconsole
                 }
 
                 FneUtils.Memset(mi, 0x00, P25Defines.P25_MI_LENGTH);
-
-				uint srcId = uint.Parse(Convert.ToInt64(headcode, 16).ToString());
+                string SSISISIS = Convert.ToInt64(headcode, 16).ToString();
+				uint srcId = uint.Parse(SSISISIS);
 				uint dstId = uint.Parse(currentdestID);
 
 				if (TxStreamId != 0)
@@ -2065,8 +2068,6 @@ namespace dvmconsole
         /// <exception cref="NotImplementedException"></exception>
         private void ChannelBox_PTTButtonReleased()
         {
-            if (currentsystem == PLAYBACKSYS || currentchannel == PLAYBACKCHNAME || currentdestID == PLAYBACKTG)
-                return;
 
             if (pttState)
             {
@@ -2094,10 +2095,11 @@ namespace dvmconsole
                     return;
                 }
 
-                
 
-                uint srcId = uint.Parse(Convert.ToInt64(headcode, 16).ToString());
-                uint dstId = uint.Parse(currentdestID);
+
+				string SSISISIS = Convert.ToInt64(headcode, 16).ToString();
+				uint srcId = uint.Parse(SSISISIS);
+				uint dstId = uint.Parse(currentdestID);
 
                 Log.WriteLine($"({currentsystem}) {currentmode.ToUpperInvariant()} Traffic *CALL END       * SRC_ID {srcId} TGID {dstId} [STREAM ID {TxStreamId}]");
                 //e.VolumeMeterLevel = 0;
@@ -2752,6 +2754,7 @@ namespace dvmconsole
                         regtimeouttimer.Start();
 						GenerateChannelWidgets();
                         EnableControls();
+                        headcode = tmphc;
 					}
                     else 
                     {
@@ -2918,6 +2921,11 @@ namespace dvmconsole
                 UpdateRadioBackground("bg_main_hd_light.png");
 
                 currentchannel = regheadcode0.Text + regheadcode1.Text+regheadcode2.Text + regheadcode3.Text + regheadcode4.Text + regheadcode5.Text + ridaliasP6.Text+ ridaliasP7.Text+ ridaliasP8.Text+ ridaliasP9.Text+ ridaliasP10.Text+ ridaliasP11.Text;
+                currentchannel= currentchannel.Replace(" ", "");
+                Channel SELCH =Codeplug.GetChannelByName(currentchannel);
+                currentmode = SELCH.Mode;
+				currentdestID = SELCH.Tgid;
+				currentsystem = SELCH.System;
 				chnameP0.Text = regheadcode0.Text;
 				chnameP1.Text = regheadcode1.Text;
 				chnameP2.Text = regheadcode2.Text;
@@ -3922,16 +3930,17 @@ namespace dvmconsole
         /// <param name="e"></param>
 		private void pttButton_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
 		{
-			if (IsTxEncrypted && !Crypter.HasKey())
-			{
-				//TODO: Move this to a Radio Error
-				MessageBox.Show($"{currentchannel} {"ERR_NO_LOADED_ENC_KEY"}.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-				pttState = false;
-				return;
-			}
+            Log.WriteLog("PTTButtonPress");
+			//if (IsTxEncrypted && !Crypter.HasKey())
+			//{
+			//	//TODO: Move this to a Radio Error
+			//	MessageBox.Show($"{currentchannel} {"ERR_NO_LOADED_ENC_KEY"}.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+			//	pttState = false;
+			//	return;
+			//}
 
-			pttState = true;
-			ChannelBox_PTTButtonPressed();
+			//pttState = true;
+			//ChannelBox_PTTButtonPressed();
 
 		}
 
@@ -3943,8 +3952,9 @@ namespace dvmconsole
 		/// <param name="e"></param>
 		private void pttButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
 		{
-            ChannelBox_PTTButtonReleased();
-			pttState = false;
+			Log.WriteLog("PTTButtonPressRel");
+			//ChannelBox_PTTButtonReleased();
+			//pttState = false;
 		}
 
         /// <summary>
@@ -3976,7 +3986,8 @@ namespace dvmconsole
 
 		private void pttButton_Click(object sender, RoutedEventArgs e)
 		{
-            if (pttState == false) 
+			Log.WriteLog("PTTButtonClick");
+			if (pttState == false) 
             {
 				if (IsTxEncrypted && !Crypter.HasKey())
 				{
@@ -3986,12 +3997,25 @@ namespace dvmconsole
 					return;
 				}
 
+				
+				//ChannelBox_PTTButtonPressed();
+				foreach (ChannelBox channel in selectedChannelsManager.GetSelectedChannels())
+				{
+                    object obj = new object();
+                    RoutedEventArgs REA = new RoutedEventArgs();
+                    channel.PttButton_Click(obj,REA);
+				}
 				pttState = true;
-				ChannelBox_PTTButtonPressed();
 			}
-            if (pttState == true) 
+            else if (pttState == true) 
             {
-				ChannelBox_PTTButtonReleased();
+				foreach (ChannelBox channel in selectedChannelsManager.GetSelectedChannels())
+				{
+					object obj = new object();
+					RoutedEventArgs REA = new RoutedEventArgs();
+					channel.PttButton_Click(obj, REA);
+				}
+				//ChannelBox_PTTButtonReleased();
 				pttState = false;
 			}
 			
