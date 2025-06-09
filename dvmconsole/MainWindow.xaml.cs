@@ -4005,6 +4005,7 @@ namespace dvmconsole
                     RoutedEventArgs REA = new RoutedEventArgs();
                     channel.PttButton_Click(obj,REA);
 				}
+				UpdateRadioBackground("shoutgoingcall.png");
 				pttState = true;
 			}
             else if (pttState == true) 
@@ -4016,6 +4017,7 @@ namespace dvmconsole
 					channel.PttButton_Click(obj, REA);
 				}
 				//ChannelBox_PTTButtonReleased();
+				UpdateRadioBackground("bg_main_hd_light.png");
 				pttState = false;
 			}
 			

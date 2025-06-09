@@ -57,6 +57,7 @@
     <None Remove="Assets\select.png" />
     <None Remove="Assets\shincomingcall.png" />
     <None Remove="Assets\shincomingfull.png" />
+    <None Remove="Assets\shoutgoingcall.png" />
     <None Remove="Assets\whackerlink-logo.png" />
     <None Remove="Assets\WhackerLinkLogoV2.png" />
     <None Remove="bg_main_hd_dark.png" />
@@ -166,6 +167,7 @@
     </Resource>
     <Resource Include="Assets\shincomingcall.png" />
     <Resource Include="Assets\shincomingfull.png" />
+    <Resource Include="Assets\shoutgoingcall.png" />
     <Resource Include="bg_main_hd_dark.png" />
     <Resource Include="bg_main_hd_light.png" />
     <Resource Include="Fonts\MedodicaRegular.otf">
