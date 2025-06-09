@@ -131,6 +131,8 @@ namespace dvmconsole
         private string currentchannel;
         private string currentsystem;
         private string currentdestID;
+        private string currentmode;
+        private int currentInternalID;
 
 		//Please dont kill me for this :3 - Nyx
 		private bool pttState;
@@ -154,7 +156,34 @@ namespace dvmconsole
 		public int ambeCount = 0;
 		public byte[] ambeBuffer = new byte[FneSystemBase.DMR_AMBE_LENGTH_BYTES];
 		public EmbeddedData embeddedData = new EmbeddedData();
+		/// <summary>
+		/// 
+		/// </summary>
+		public uint TxStreamId { get; internal set; }
 
+		/// <summary>
+		/// 
+		/// </summary>
+		public uint PeerId { get; set; }
+		/// <summary>
+		/// 
+		/// </summary>
+		public uint RxStreamId { get; set; }
+		public string VoiceChannel { get; set; }
+		public bool IsReceiving { get; set; } = false;
+		/// <summary>
+		/// Flag indicating whether or not this channel is receiving encrypted.
+		/// </summary>
+		public bool IsReceivingEncrypted { get; set; } = false;
+
+		/// <summary>
+		/// Flag indicating whether or not the console is transmitting with encryption.
+		/// </summary>
+		public bool IsTxEncrypted { get; set; } = false;
+		/// <summary>
+		/// Last Packet Time
+		/// </summary>
+		public DateTime LastPktTime = DateTime.Now;
 		public byte[] mi = new byte[P25Defines.P25_MI_LENGTH];     // Message Indicator
 		public byte algId = 0;                                     // Algorithm ID
 		public ushort kId = 0;                                     // Key ID
@@ -747,18 +776,18 @@ namespace dvmconsole
         /// Helper to reset channel states.
         /// </summary>
         /// <param name="e"></param>
-        private void ResetChannel(ChannelBox e)
+        private void ResetChannel()
         {
             // reset values
-            e.p25SeqNo = 0;
-            e.p25N = 0;
+            p25SeqNo = 0;
+            p25N = 0;
 
-            e.dmrSeqNo = 0;
-            e.dmrN = 0;
+            dmrSeqNo = 0;
+            dmrN = 0;
 
-            e.pktSeq = 0;
+            pktSeq = 0;
 
-            e.TxStreamId = 0;
+            TxStreamId = 0;
         }
 
         /// <summary>
@@ -898,7 +927,7 @@ namespace dvmconsole
 
                                 fne.SendP25TDU(uint.Parse(system.Rid), uint.Parse(cpgChannel.Tgid), false);
 
-                                ResetChannel(channel);
+                                ResetChannel();
 
                                 Dispatcher.Invoke(() =>
                                 {
@@ -1225,8 +1254,6 @@ namespace dvmconsole
 		/// <param name="e"></param>
 		private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            const double widthOffset = 0;
-            const double heightOffset = 0;
 
 			RXbgtimer = new DispatcherTimer
 			{
@@ -1268,31 +1295,6 @@ namespace dvmconsole
 			errmsgbackgroundworker1.DoWork += new DoWorkEventHandler(errmsgbackgroundworker1_DoWork);
 			errmsgbackgroundworker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(errmsgbackgroundworker1_RunWorkerCompleted);
 
-			/*// set window configuration
-            if (settingsManager.Maximized)
-            {
-                windowLoaded = true;
-                WindowState = WindowState.Maximized;
-                ResizeCanvasToWindow_Click(sender, e);
-            }
-            else
-            {
-                Width = settingsManager.WindowWidth;
-                channelsCanvas.Width = settingsManager.CanvasWidth;
-                if (settingsManager.CanvasWidth > settingsManager.WindowWidth)
-                    canvasScrollViewer.Width = Width - widthOffset;
-                else
-                    canvasScrollViewer.Width = Width;
-
-                Height = settingsManager.WindowHeight;
-                channelsCanvas.Height = settingsManager.CanvasHeight;
-                if (settingsManager.CanvasHeight > settingsManager.WindowHeight)
-                    canvasScrollViewer.Height = Height - heightOffset;
-                else
-                    canvasScrollViewer.Height = Height;
-
-                windowLoaded = true;
-            }*/
 			UpdateRadioBackground("schboot.png");
 			bootbackgroundworker1.DoWork += new DoWorkEventHandler(bootbackgroundworker1_DoWork);
 			bootbackgroundworker1.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bootbackgroundworker1_RunWorkerCompleted);
@@ -1928,7 +1930,7 @@ namespace dvmconsole
                     fne.SendDMRTerminator(srcId, dstId, 1, e.dmrSeqNo, e.dmrN, e.embeddedData);
 
                 // reset values
-                ResetChannel(e);
+                ResetChannel();
             }
         }
 
@@ -1998,7 +2000,7 @@ namespace dvmconsole
         /// <param name="sender"></param>
         /// <param name="e"></param>
         /// <exception cref="NotImplementedException"></exception>
-        private void ChannelBox_PTTButtonReleased(object sender, ChannelBox e)
+        private void ChannelBox_PTTButtonReleased()
         {
             if (currentsystem == PLAYBACKSYS || currentchannel == PLAYBACKCHNAME || currentdestID == PLAYBACKTG)
                 return;
@@ -2009,44 +2011,39 @@ namespace dvmconsole
                 if (system == null)
                 {
                     MessageBox.Show($"{currentchannel} refers to an {INVALID_SYSTEM} {currentsystem}. {PLEASE_CHECK_CODEPLUG}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    e.IsSelected = false;
-                    selectedChannelsManager.RemoveSelectedChannel(e);
+                    
                     return;
                 }
 
-                Codeplug.Channel cpgChannel = Codeplug.GetChannelByName(e.ChannelName);
+                Codeplug.Channel cpgChannel = Codeplug.GetChannelByName(currentchannel);
                 if (cpgChannel == null)
                 {
                     // bryanb: this should actually never happen...
-                    MessageBox.Show($"{e.ChannelName} refers to an {INVALID_CODEPLUG_CHANNEL}. {PLEASE_CHECK_CODEPLUG}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    e.IsSelected = false;
-                    selectedChannelsManager.RemoveSelectedChannel(e);
+                    MessageBox.Show($"{currentchannel} refers to an {INVALID_CODEPLUG_CHANNEL}. {PLEASE_CHECK_CODEPLUG}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
 
-                PeerSystem fne = fneSystemManager.GetFneSystem(system.Name);
+                PeerSystem fne = fneSystemManager.GetFneSystem(currentsystem);
                 if (fne == null)
                 {
-                    MessageBox.Show($"{e.ChannelName} has a {ERR_INVALID_FNE_REF}. {PLEASE_RESTART_CONSOLE}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                    e.IsSelected = false;
-                    selectedChannelsManager.RemoveSelectedChannel(e);
+                    MessageBox.Show($"{currentchannel} has a {ERR_INVALID_FNE_REF}. {PLEASE_RESTART_CONSOLE}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    
                     return;
                 }
 
-                if (!e.IsSelected)
-                    return;
+                
 
-                uint srcId = uint.Parse(system.Rid);
-                uint dstId = uint.Parse(cpgChannel.Tgid);
+                uint srcId = uint.Parse(Convert.ToInt64(headcode, 16).ToString());
+                uint dstId = uint.Parse(currentdestID);
 
-                Log.WriteLine($"({system.Name}) {e.ChannelMode.ToUpperInvariant()} Traffic *CALL END       * SRC_ID {srcId} TGID {dstId} [STREAM ID {e.TxStreamId}]");
-                e.VolumeMeterLevel = 0;
+                Log.WriteLine($"({currentsystem}) {currentmode.ToUpperInvariant()} Traffic *CALL END       * SRC_ID {srcId} TGID {dstId} [STREAM ID {TxStreamId}]");
+                //e.VolumeMeterLevel = 0;
                 if (cpgChannel.GetChannelMode() == Codeplug.ChannelMode.P25)
                     fne.SendP25TDU(srcId, dstId, false);
                 else if (cpgChannel.GetChannelMode() == Codeplug.ChannelMode.DMR)
-                    fne.SendDMRTerminator(srcId, dstId, 1, e.dmrSeqNo, e.dmrN, e.embeddedData);
+                    fne.SendDMRTerminator(srcId, dstId, 1, dmrSeqNo, dmrN, embeddedData);
 
-                ResetChannel(e);
+                ResetChannel();
             }
         }
 

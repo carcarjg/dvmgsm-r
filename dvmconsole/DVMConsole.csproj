@@ -10,18 +10,18 @@
     <Platforms>AnyCPU;x64;x86</Platforms>
     <Configurations>Debug;Release;WIN32</Configurations>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Copyright>Copyright (c) 2025 Caleb, K4PHP and DVMProject (https://github.com/dvmproject) Authors.</Copyright>
+    <Copyright>Copyright (c) 2025 Nyx, N5UWU, Caleb, K4PHP and DVMProject (https://github.com/dvmproject) Authors.</Copyright>
     <PlatformTarget>x86</PlatformTarget>
     <PackageLicenseExpression>AGPL-3.0-only</PackageLicenseExpression>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
-    <Title>Digital Voice Modem - Desktop Dispatch Console</Title>
-    <Authors>Caleb, K4PHP and DVMProject (https://github.com/dvmproject) Authors</Authors>
+    <Title>Digital Voice Modem - GSM-R</Title>
+    <Authors>Nyx, N5UWU - Caleb, K4PHP and DVMProject (https://github.com/dvmproject) Authors</Authors>
     <Company>DVMProject</Company>
-    <Product>Digital Voice Modem - Desktop Dispatch Console</Product>
-    <PackageProjectUrl>https://github.com/DVMProject/dvmconsole</PackageProjectUrl>
+    <Product>Digital Voice Modem - GSM-R</Product>
+    <PackageProjectUrl>https://github.com/carcarjg/dvmgsm-r</PackageProjectUrl>
     <PackageIcon>AppIcon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/DVMProject/dvmconsole</RepositoryUrl>
+    <RepositoryUrl>https://github.com/carcarjg/dvmgsm-r</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <AssemblyVersion>1.0.*</AssemblyVersion>
   </PropertyGroup>
