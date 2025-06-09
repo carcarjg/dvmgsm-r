@@ -7,6 +7,13 @@ DVM users to listen to one talkgroup on a DVM FNE from a single application usin
 ![image](https://github.com/user-attachments/assets/062c367a-cbfa-4fa7-a06f-4adf3abddf2c)
 
 
+## ToDo
+
+Pre-built releases that are 100% ready to run.
+Enable Signaller and Emergecy buttons.
+Add abilty to designate Signaller.
+Signaller button to page designated signaller and play a local alert noise and display the signaller screen
+Energency button to play an alert sound over the selected TG and PTT for 15 seconds and display the emergency call screen.
 
 ## Building
 
