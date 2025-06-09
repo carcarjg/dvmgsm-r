@@ -3,7 +3,8 @@
 The Digital Voice Modem Global System for Mobile Communications – Railway (GSM-R), provides a WPF desktop application that mimics or otherwise operates like a typical GSM-R, allowing
 DVM users to listen to one talkgroup on a DVM FNE from a single application using a Siemens GSM-R look and feel.
 
-![image](https://github.com/user-attachments/assets/11c89711-6cf8-464c-aeae-732838aa57ef)
+
+![image](https://github.com/user-attachments/assets/062c367a-cbfa-4fa7-a06f-4adf3abddf2c)
 
 
 
@@ -36,6 +37,7 @@ Please note that while, x64 CPU types are supported, it will require compiling t
 ## Project Notes
 
 - Radio ID aliases and channel aliases MUST be under 12 characters long
+- This project was forked from https://github.com/DVMProject/dvmconsole Thanks to the DVM team for all their hard work!!!
 
 ## License
 
