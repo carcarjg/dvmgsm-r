@@ -27,7 +27,7 @@ The GSM-R software requires the library dependancies below. Generally, the softw
 
 ### Dependencies
 
-- dvmvocoder (libvocoder); https://github.com/DVMProject/dvmvocoder
+- dvmvocoder (libvocoder); https://github.com/DVMProject/dvmvocoder (Bundled. If you get an error. Then try getting this)
 
 ### Build Instructions
 
