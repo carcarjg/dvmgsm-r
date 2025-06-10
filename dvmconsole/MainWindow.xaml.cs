@@ -139,6 +139,7 @@ namespace dvmconsole
         private string currentmode;
         private int currentInternalID =0;
         private bool _sysregstate;
+        private int currentchannelindex;
 
 		public bool sysregstate 
         {
@@ -240,8 +241,9 @@ namespace dvmconsole
         private readonly AudioManager audioManager;
 
         private static System.Timers.Timer channelHoldTimer;
+		private static System.Timers.Timer channelRXTimer;
 
-        private Dictionary<string, SlotStatus> systemStatuses = new Dictionary<string, SlotStatus>();
+		private Dictionary<string, SlotStatus> systemStatuses = new Dictionary<string, SlotStatus>();
         private FneSystemManager fneSystemManager = new FneSystemManager();
 
         private bool selectAll = false;
@@ -316,13 +318,42 @@ namespace dvmconsole
 				ExtFullRateVocoder = new AmbeVocoder();
 				ExtHalfRateVocoder = new AmbeVocoder(false);
 			}
+			channelRXTimer = new System.Timers.Timer();
+			channelRXTimer.Interval = 500;
+			channelRXTimer.Enabled = true;
+			channelRXTimer.AutoReset = true;
+			channelRXTimer.Elapsed += ChannelRXTimer_Elapsed;
+            channelRXTimer.Stop();
+		}
+        public bool RXiProg;
+        public string RXiProgRID;
+		private void ChannelRXTimer_Elapsed(object sender, ElapsedEventArgs e)
+		{
+            List<ChannelBox> CH;
+
+			CH = selectedChannelsManager.GetSelectedChannels().ToList();
+            try 
+            {
+                if (CH[currentchannelindex] != null)
+                {
+                    if (CH[currentchannelindex].IsReceiving == true)
+                    {
+                        RXCall();
+                    }
+                    else 
+                    {
+                        RXendCall();
+                    }
+                }
+			}
+			catch(Exception ex) { Log.WriteError(ex.Message); }
 
 		}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private void PrimaryChannelChanged()
+		/// <summary>
+		/// 
+		/// </summary>
+		private void PrimaryChannelChanged()
         {
             var primaryChannel = selectedChannelsManager.PrimaryChannel;
             foreach (UIElement element in channelsCanvas.Children)
@@ -643,52 +674,59 @@ namespace dvmconsole
             //Dont know. Are you?
             if (settingsManager.ShowChannels && Codeplug != null)
             {
+                int channelindex=0;
                 // iterate through the coeplug zones and begin building channel widgets
                 foreach (var zone in Codeplug.Zones)
                 {
-                    var channel = zone.Channels[0];
-                    ChannelBox channelBox = new ChannelBox(selectedChannelsManager, audioManager, channel.Name, channel.System, channel.Tgid, settingsManager.TogglePTTMode);
-                    channelBox.ChannelMode = channel.Mode.ToUpperInvariant();
-                    if (channel.GetAlgoId() != P25Defines.P25_ALGO_UNENCRYPT && channel.GetKeyId() > 0)
-                        channelBox.IsTxEncrypted = true;
+                    foreach (Channel channel in zone.Channels) 
+                    {
+                        
+						ChannelBox channelBox = new ChannelBox(selectedChannelsManager, audioManager, channel.Name, channel.System, channel.Tgid, settingsManager.TogglePTTMode);
+						channelBox.ChannelMode = channel.Mode.ToUpperInvariant();
+						if (channel.GetAlgoId() != P25Defines.P25_ALGO_UNENCRYPT && channel.GetKeyId() > 0)
+							channelBox.IsTxEncrypted = true;
 
-                     systemStatuses.Add(channel.Name, new SlotStatus());
+						systemStatuses.Add(channel.Name, new SlotStatus());
 
-                     if (settingsManager.ChannelPositions.TryGetValue(channel.Name, out var position))
-                     {
-                        Canvas.SetLeft(channelBox, position.X);
-                        Canvas.SetTop(channelBox, position.Y);
-                     }
-                        else
-                        {
-                            Canvas.SetLeft(channelBox, offsetX);
-                            Canvas.SetTop(channelBox, offsetY);
-                        }
+						if (settingsManager.ChannelPositions.TryGetValue(channel.Name, out var position))
+						{
+							Canvas.SetLeft(channelBox, position.X);
+							Canvas.SetTop(channelBox, position.Y);
+						}
+						else
+						{
+							Canvas.SetLeft(channelBox, offsetX);
+							Canvas.SetTop(channelBox, offsetY);
+						}
 
-                        channelBox.PTTButtonClicked += ChannelBox_PTTButtonClicked;
-                        channelBox.PageButtonClicked += ChannelBox_PageButtonClicked;
-                        channelBox.HoldChannelButtonClicked += ChannelBox_HoldChannelButtonClicked;
-                        channelBox.IsSelected = true;
-                        channelBox.IsPrimary = true;
-                        channelBox.IsEnabled = true;
-                        // widget placement
-                        channelBox.MouseRightButtonDown += ChannelBox_MouseRightButtonDown;
-                        channelBox.MouseRightButtonUp += ChannelBox_MouseRightButtonUp;
-                        channelBox.MouseMove += ChannelBox_MouseMove;
-                        selectedChannelsManager.AddSelectedChannel(channelBox);
+						channelBox.PTTButtonClicked += ChannelBox_PTTButtonClicked;
+						channelBox.PageButtonClicked += ChannelBox_PageButtonClicked;
+						channelBox.HoldChannelButtonClicked += ChannelBox_HoldChannelButtonClicked;
+						channelBox.NewCallRX += ChannelBox_NewCallRX;
+						
+						// widget placement
+						channelBox.MouseRightButtonDown += ChannelBox_MouseRightButtonDown;
+						channelBox.MouseRightButtonUp += ChannelBox_MouseRightButtonUp;
+						channelBox.MouseMove += ChannelBox_MouseMove;
+						selectedChannelsManager.AddSelectedChannel(channelBox);
 
-                        channelsCanvas.Children.Add(channelBox);
+						channelsCanvas.Children.Add(channelBox);
 
-                        offsetX += 269;
+						offsetX += 269;
 
-                        if (offsetX + 264 > channelsCanvas.ActualWidth)
-                        {
-                            offsetX = 20;
-                            offsetY += 116;
-                        }
-                        channelBox.Visibility = Visibility.Hidden;
-                }
-            }
+						if (offsetX + 264 > channelsCanvas.ActualWidth)
+						{
+							offsetX = 20;
+							offsetY += 116;
+						}
+						channelBox.Visibility = Visibility.Hidden;
+						channelindex++;
+					}
+					
+					
+				}
+				channelRXTimer.Start();
+			}
 
             // are we showing user configured alert tones?
             if (settingsManager.ShowAlertTones && Codeplug != null)
@@ -750,10 +788,15 @@ namespace dvmconsole
             Cursor = Cursors.Arrow;
 		}
 
-        /// <summary>
-        /// 
-        /// </summary>
-        private void SelectedChannelsChanged()
+        private void ChannelBox_NewCallRX(object obj, ChannelBox e) 
+        {
+            
+        }
+
+		/// <summary>
+		/// 
+		/// </summary>
+		private void SelectedChannelsChanged()
         {
             foreach (ChannelBox channel in selectedChannelsManager.GetSelectedChannels())
             {
@@ -2755,6 +2798,8 @@ namespace dvmconsole
 						GenerateChannelWidgets();
                         EnableControls();
                         headcode = tmphc;
+                        var sys = Codeplug.Systems[0];
+						sys.Rid = Convert.ToInt64(headcode, 16).ToString(); ;
 					}
                     else 
                     {
@@ -3084,6 +3129,7 @@ namespace dvmconsole
             headcodeb3.Text = headcode[3].ToString();
             headcodeb4.Text = headcode[4].ToString();
 			headcodeb5.Text = headcode[5].ToString();
+
 		}
         private int HC1Click;
 		private int HC2Click;
@@ -3580,22 +3626,108 @@ namespace dvmconsole
 
         private void RXCall() 
         {
-            RXbgtimer.Start();
+			RXbgtimer.IsEnabled = true;
+			RXbgtimer.Start();
+		}
+        bool fixbg;
+        private void RXendCall() 
+        {
+            if(RXbgtimer.IsEnabled == true) 
+            {
+                
+                fixbg = true;
+            }
+
         }
 
-        private void OnRXbgtimerTick(object sender, EventArgs e) 
+		private void OnRXbgtimerTick(object sender, EventArgs e) 
         {
-            if (curRXbg == 0) 
+			if (fixbg == true)
+			{
+				UpdateRadioBackground("bg_main_hd_light.png");
+				fixbg = false;
+				RXbgtimer.Stop();
+				RXbgtimer.IsEnabled = false;
+				//Row 3 Pixels
+				regheadcode0.Text = "";
+				regheadcode1.Text = "";
+				regheadcode2.Text = "";
+				regheadcode3.Text = "";
+				regheadcode4.Text = "";
+				regheadcode5.Text = "";
+				ridaliasP6.Text = "";
+				ridaliasP7.Text = "";
+				ridaliasP8.Text = "";
+				ridaliasP9.Text = "";
+				ridaliasP10.Text = "";
+				ridaliasP11.Text = "";
+			}
+            else if (curRXbg == 0) 
             {
                 UpdateRadioBackground("shincomingfull.png");
-                curRXbg = 1;
+				foreach (UIElement element in channelsCanvas.Children)
+				{
+					if (element is ChannelBox box)
+					{
+						if (box.ChannelName == currentchannel)
+						{
+							RXiProgRID = box.currentRXRID;
+						}
+					}
+				}
+                do { RXiProgRID = RXiProgRID + " "; } while (RXiProgRID.Length<12);
+
+                char[] RXIDarr = RXiProgRID.ToArray();
+
+				//Row 3 Pixels
+				regheadcode0.Text = RXIDarr[0].ToString();
+				regheadcode1.Text = RXIDarr[1].ToString();
+				regheadcode2.Text = RXIDarr[2].ToString();
+				regheadcode3.Text = RXIDarr[3].ToString();
+				regheadcode4.Text = RXIDarr[4].ToString();
+				regheadcode5.Text = RXIDarr[5].ToString();
+				ridaliasP6.Text = RXIDarr[6].ToString();
+				ridaliasP7.Text = RXIDarr[7].ToString();
+				ridaliasP8.Text = RXIDarr[8].ToString();
+				ridaliasP9.Text = RXIDarr[9].ToString();
+				ridaliasP10.Text = RXIDarr[10].ToString();
+				ridaliasP11.Text = RXIDarr[11].ToString();
+				curRXbg = 1;
             }
             else if(curRXbg == 1)
             {
                 UpdateRadioBackground("shincomingcall.png");
+				foreach (UIElement element in channelsCanvas.Children)
+				{
+					if (element is ChannelBox box)
+					{
+						if (box.ChannelName == currentchannel)
+						{
+							RXiProgRID = box.currentRXRID;
+						}
+					}
+				}
+				do { RXiProgRID = RXiProgRID + " "; } while (RXiProgRID.Length < 12);
+
+				char[] RXIDarr = RXiProgRID.ToArray();
+
+				//Row 3 Pixels
+				regheadcode0.Text = RXIDarr[0].ToString();
+				regheadcode1.Text = RXIDarr[1].ToString();
+				regheadcode2.Text = RXIDarr[2].ToString();
+				regheadcode3.Text = RXIDarr[3].ToString();
+				regheadcode4.Text = RXIDarr[4].ToString();
+				regheadcode5.Text = RXIDarr[5].ToString();
+				ridaliasP6.Text = RXIDarr[6].ToString();
+				ridaliasP7.Text = RXIDarr[7].ToString();
+				ridaliasP8.Text = RXIDarr[8].ToString();
+				ridaliasP9.Text = RXIDarr[9].ToString();
+				ridaliasP10.Text = RXIDarr[10].ToString();
+				ridaliasP11.Text = RXIDarr[11].ToString();
 				curRXbg = 0;
 			}
-        }
+			
+		}
 
 		private void sgButton_Click(object sender, RoutedEventArgs e)
 		{
@@ -3808,6 +3940,26 @@ namespace dvmconsole
 			ridaliasP9.Text = "";
 			ridaliasP10.Text = "";
 			ridaliasP11.Text = "";
+
+            selectedChannelsManager.ClearPrimaryChannel();
+            selectedChannelsManager.ClearSelections();
+			foreach (UIElement element in channelsCanvas.Children)
+			{
+				if (element is ChannelBox box)
+				{
+                    if (box.ChannelName == currentchannel) 
+                    {
+                        box.IsEnabled = true;
+                        box.IsSelected = true;
+                        box.IsPrimary = true;
+						selectedChannelsManager.AddSelectedChannel(box);
+					}
+				}
+			}
+            
+            
+
+			
 		}
 
 		private void errmsgbackgroundworker1_DoWork(object sender, DoWorkEventArgs e)

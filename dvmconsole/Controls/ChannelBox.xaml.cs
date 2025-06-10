@@ -129,6 +129,8 @@ namespace dvmconsole.Controls
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public event EventHandler<ChannelBox> NewCallRX;
+
         /*
         ** Properties
         */
@@ -620,7 +622,7 @@ namespace dvmconsole.Controls
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
+        public string currentRXRID;
         /// <summary>
         /// 
         /// </summary>
@@ -629,6 +631,7 @@ namespace dvmconsole.Controls
         /// <param name="dstId"></param>
         public void AddCall(string channel, int srcId, int dstId, string timestamp)
         {
+			currentRXRID = srcId.ToString("X");
             callHistoryWindow.AddCall(channel, srcId, dstId, timestamp);
         }
 
