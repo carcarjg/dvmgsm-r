@@ -3855,6 +3855,7 @@ namespace dvmconsole
             }
             else 
             {
+                /*
                 newvolButPress = true;
 				regheadcode0.Text = "";
 				regheadcode1.Text = "";
@@ -3862,13 +3863,26 @@ namespace dvmconsole
 				regheadcode3.Text = "";
 				regheadcode4.Text = "";
 				regheadcode5.Text = "";
-				if (volume == 4) { UpdateRadioBackground("schvol4.png"); }
-				else if (volume == 3) { UpdateRadioBackground("schvol4.png"); volume = 4; }
-				else if (volume == 2) { UpdateRadioBackground("schvol3.png"); volume = 3; }
-				else if (volume == 1) { UpdateRadioBackground("schvol2.png"); volume = 2; }
-				else if (volume == 0) { UpdateRadioBackground("schvol1.png"); volume = 1; }
+				foreach (UIElement element in channelsCanvas.Children)
+				{
+					if (element is ChannelBox box)
+					{
+						if (box.ChannelName == currentchannel)
+						{
+							if (box.Volume == 4) { UpdateRadioBackground("schvol4.png"); }
+							else if (box.Volume == 3) { UpdateRadioBackground("schvol4.png"); box.Volume = 4; }
+							else if (box.Volume == 2) { UpdateRadioBackground("schvol3.png"); box.Volume = 3; }
+							else if (box.Volume == 1) { UpdateRadioBackground("schvol2.png"); box.Volume = 2; }
+							else if (box.Volume == 0) { UpdateRadioBackground("schvol1.png"); box.Volume = 1; }
+							
+						}
+					}
+				}
+				
                 try { volbackgroundworker1.RunWorkerAsync(); } catch (Exception ex) { }
-                
+				*/
+
+
 			}
 		}
 
@@ -3890,6 +3904,8 @@ namespace dvmconsole
             }
             else 
             {
+				/*
+                 * Disabled bc Buggy. TODO: Fix later
                 newvolButPress = true;
 				regheadcode0.Text = "";
 				regheadcode1.Text = "";
@@ -3897,12 +3913,22 @@ namespace dvmconsole
 				regheadcode3.Text = "";
 				regheadcode4.Text = "";
 				regheadcode5.Text = "";
-				if (volume == 0) { UpdateRadioBackground("schvol0.png"); }
-				else if (volume == 1) { UpdateRadioBackground("schvol0.png"); volume = 0; }
-				else if (volume == 2) { UpdateRadioBackground("schvol1.png"); volume = 1; }
-				else if (volume == 3) { UpdateRadioBackground("schvol2.png"); volume = 2; }
-				else if (volume == 4) { UpdateRadioBackground("schvol3.png"); volume = 3; }
-				try { volbackgroundworker1.RunWorkerAsync(); } catch (Exception ex) { }
+				foreach (UIElement element in channelsCanvas.Children)
+				{
+					if (element is ChannelBox box)
+					{
+						if (box.ChannelName == currentchannel)
+						{
+							if (box.Volume == 0) { UpdateRadioBackground("schvol0.png"); }
+							else if (box.Volume == 1) { UpdateRadioBackground("schvol0.png"); box.Volume = 0; }
+							else if (box.Volume == 2) { UpdateRadioBackground("schvol1.png"); box.Volume = 1; }
+							else if (box.Volume == 3) { UpdateRadioBackground("schvol2.png"); box.Volume = 2; }
+							else if (box.Volume == 4) { UpdateRadioBackground("schvol3.png"); box.Volume = 3; }
+						}
+					}
+				}
+
+				try { volbackgroundworker1.RunWorkerAsync(); } catch (Exception ex) { }*/
 			}
 		}
         private int bstimerthing;
