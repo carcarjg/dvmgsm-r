@@ -34,4 +34,4 @@ jobs:
         with:
           name: dvm-gsmr-build
           path: |
-            **/bin/Release/net8.0-windows7.0/
+            **/bin/x64/Release/net8.0-windows7.0/
