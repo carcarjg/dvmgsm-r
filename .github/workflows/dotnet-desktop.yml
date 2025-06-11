@@ -16,7 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          submodules: recurse
+          submodules: recursive
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
