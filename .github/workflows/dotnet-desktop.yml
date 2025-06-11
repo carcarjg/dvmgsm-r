@@ -40,9 +40,9 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev/continuous-integration"]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "dev/continuous-integration" ]
 
 jobs:
 
