@@ -2720,8 +2720,9 @@ namespace dvmconsole
 				chnameP10.Text = "";
 				chnameP11.Text = "";
 			}
-            else 
+            else
             {
+                if (regbackgroundworker1.IsBusy) return;
                 isbooted = true;
                 isreging = true;
 				UpdateRadioBackground("schaskRegCode.png");
@@ -2801,71 +2802,77 @@ namespace dvmconsole
                         var sys = Codeplug.Systems[0];
 						sys.Rid = Convert.ToInt64(headcode, 16).ToString(); ;
 					}
-                    else 
+                    else
                     {
-						MediaPlayer mediaPlayer = new MediaPlayer();
-						mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/S2_warning.wav")));
-						mediaPlayer.Play();
-						UpdateRadioBackground("bg_main_hd_light.png");
-						isreging = false;
-						isregged = false;
-						hc6entered = false;
-						hc5entered = false;
-						hc4entered = false;
-						hc3entered = false;
-						hc2entered = false;
-						hc1entered = false;
+                        if (errmsgbackgroundworker1.IsBusy) return;
+                        MediaPlayer mediaPlayer = new MediaPlayer();
+                        mediaPlayer.Open(new Uri(System.IO.Path.Combine(
+                            AppDomain.CurrentDomain.BaseDirectory, "Audio/S2_warning.wav")));
+                        mediaPlayer.Play();
+                        UpdateRadioBackground("bg_main_hd_light.png");
+                        isreging = false;
+                        isregged = false;
+                        hc6entered = false;
+                        hc5entered = false;
+                        hc4entered = false;
+                        hc3entered = false;
+                        hc2entered = false;
+                        hc1entered = false;
 
-						//Max ID
-						regheadcode0.Text = "M";
-						regheadcode1.Text = "a";
-						regheadcode2.Text = "x";
-						regheadcode3.Text = "";
-						regheadcode4.Text = "I";
-						regheadcode5.Text = "D";
-						ridaliasP6.Text = "";
-						ridaliasP7.Text = "";
-						ridaliasP8.Text = "";
-						ridaliasP9.Text = "";
-						ridaliasP10.Text = "";
-						ridaliasP11.Text = "";
-						errmsgbackgroundworker1.RunWorkerAsync();
-					}
-
+                        //Max ID
+                        regheadcode0.Text = "M";
+                        regheadcode1.Text = "a";
+                        regheadcode2.Text = "x";
+                        regheadcode3.Text = "";
+                        regheadcode4.Text = "I";
+                        regheadcode5.Text = "D";
+                        ridaliasP6.Text = "";
+                        ridaliasP7.Text = "";
+                        ridaliasP8.Text = "";
+                        ridaliasP9.Text = "";
+                        ridaliasP10.Text = "";
+                        ridaliasP11.Text = "";
+                        errmsgbackgroundworker1.RunWorkerAsync();
+                    }
                 }
-                else 
+                else
                 {
-					MediaPlayer mediaPlayer = new MediaPlayer();
-					mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/S2_warning.wav")));
-					mediaPlayer.Play();
-					UpdateRadioBackground("bg_main_hd_light.png");
-					isreging = false;
-					isregged = false;
-					hc6entered = false;
-					hc5entered = false;
-					hc4entered = false;
-					hc3entered = false;
-					hc2entered = false;
-					hc1entered = false;
+                    if (errmsgbackgroundworker1.IsBusy) return;
+                    errmsgbackgroundworker1.RunWorkerAsync();
 
-					//Invalid ID
-					regheadcode0.Text = "I";
-					regheadcode1.Text = "n";
-					regheadcode2.Text = "v";
-					regheadcode3.Text = "a";
-					regheadcode4.Text = "l";
-					regheadcode5.Text = "i";
-					ridaliasP6.Text = "d";
-					ridaliasP7.Text = "";
-					ridaliasP8.Text = "I";
-					ridaliasP9.Text = "D";
-					ridaliasP10.Text = "";
-					ridaliasP11.Text = "";
-					errmsgbackgroundworker1.RunWorkerAsync();
-				}
-			}
+                    MediaPlayer mediaPlayer = new MediaPlayer();
+                    mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                        "Audio/S2_warning.wav")));
+                    mediaPlayer.Play();
+                    UpdateRadioBackground("bg_main_hd_light.png");
+                    isreging = false;
+                    isregged = false;
+                    hc6entered = false;
+                    hc5entered = false;
+                    hc4entered = false;
+                    hc3entered = false;
+                    hc2entered = false;
+                    hc1entered = false;
+
+                    //Invalid ID
+
+                    regheadcode0.Text = "I";
+                    regheadcode1.Text = "n";
+                    regheadcode2.Text = "v";
+                    regheadcode3.Text = "a";
+                    regheadcode4.Text = "l";
+                    regheadcode5.Text = "i";
+                    ridaliasP6.Text = "d";
+                    ridaliasP7.Text = "";
+                    ridaliasP8.Text = "I";
+                    ridaliasP9.Text = "D";
+                    ridaliasP10.Text = "";
+                    ridaliasP11.Text = "";
+                }
+            }
             else 
             {
+                if (errmsgbackgroundworker1.IsBusy) return;
 				MediaPlayer mediaPlayer = new MediaPlayer();
 				mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/S2_warning.wav")));
 				mediaPlayer.Play();
@@ -2892,8 +2899,7 @@ namespace dvmconsole
 				ridaliasP9.Text = "";
 				ridaliasP10.Text = "";
 				ridaliasP11.Text = "";
-                errmsgbackgroundworker1.RunWorkerAsync();
-			}
+            }
 		}
 		public static bool IsHex(string text)
 		{
@@ -3795,6 +3801,7 @@ namespace dvmconsole
                 else 
                 {
 					//No Codeplug
+                    if (errmsgbackgroundworker1.IsBusy) return;
 					regheadcode0.Text = "N";
 					regheadcode1.Text = "o";
 					regheadcode2.Text = "";
@@ -3810,14 +3817,13 @@ namespace dvmconsole
 					MediaPlayer mediaPlayer = new MediaPlayer();
 					mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/S2_warning.wav")));
 					mediaPlayer.Play();
-					errmsgbackgroundworker1.RunWorkerAsync();
-
-				}
+                }
 				
 			}
             else 
             {
 				//No Register
+                if (errmsgbackgroundworker1.IsBusy) return;
 				regheadcode0.Text = "N";
 				regheadcode1.Text = "o";
 				regheadcode2.Text = "";
@@ -3833,8 +3839,7 @@ namespace dvmconsole
 				MediaPlayer mediaPlayer = new MediaPlayer();
 				mediaPlayer.Open(new Uri(System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Audio/S2_warning.wav")));
 				mediaPlayer.Play();
-                errmsgbackgroundworker1.RunWorkerAsync();
-			}
+            }
 
 		}
         private bool newvolButPress;
@@ -3990,6 +3995,7 @@ namespace dvmconsole
 
 		private void errmsgbackgroundworker1_DoWork(object sender, DoWorkEventArgs e)
 		{
+            
 			Thread.Sleep(1500);
 
 		}
