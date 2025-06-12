@@ -64,6 +64,7 @@
     <None Remove="bg_main_hd_light.png" />
     <None Remove="clearemerg.png" />
     <None Remove="connection.png" />
+    <None Remove="Fonts\ericssonga628.TTF" />
     <None Remove="Fonts\MedodicaRegular.otf" />
     <None Remove="page.png" />
     <None Remove="whackerlink-logo.png" />
@@ -170,6 +171,7 @@
     <Resource Include="Assets\shoutgoingcall.png" />
     <Resource Include="bg_main_hd_dark.png" />
     <Resource Include="bg_main_hd_light.png" />
+    <Resource Include="Fonts\ericssonga628.TTF" />
     <Resource Include="Fonts\MedodicaRegular.otf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
