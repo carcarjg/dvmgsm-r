@@ -9,7 +9,6 @@ DVM users to listen to one talkgroup on a DVM FNE from a single application usin
 
 ## ToDo
 
-Pre-built releases that are 100% ready to run.
 
 Enable Signaller and Emergecy buttons.
 
