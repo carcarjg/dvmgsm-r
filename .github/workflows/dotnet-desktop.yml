@@ -1,0 +1,37 @@
+name: Build DVM GSM-R
+
+on:
+  push:
+    branches:
+      - main
+      - dev/continuous-integration
+  pull_request:
+
+jobs:
+  build:
+    name: Build on Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dvm-gsmr-build
+          path: |
+            **/bin/x64/Release/net8.0-windows7.0/
